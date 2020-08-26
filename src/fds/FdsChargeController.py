@@ -10,11 +10,11 @@ MODBUS_RTU = 0x01
 MODBUS_ETH = 0x02
 
 CHARGE_CONTROLLER_UNIT = 0x01
-RELAY_BOX_UNIT = 0x09
-MODBUS_PORT = 502
+RELAY_BOX_UNIT         = 0x09
+MODBUS_PORT            = 502
 
 DEFAULT_CHARGE_CONTROLLER_IP = '192.168.2.253'
-DEFAULT_C23_RS485 = '/dev/ttymxc2'  # mxc3 on schematics
+DEFAULT_C23_RS485            = '/dev/ttymxc2'  # mxc3 on schematics
 
 
 def generate_dummy(values, data):
@@ -24,10 +24,10 @@ def generate_dummy(values, data):
 
 class FdsChargeController:
     communication_type = ""
-    serialPort = ""
-    ipAddress = ""
-    modbus_client = None
-    isDebug = False
+    serialPort         = ""
+    ipAddress          = ""
+    modbus_client      = None
+    isDebug            = False
 
     client = None
 
@@ -46,6 +46,7 @@ class FdsChargeController:
             logging.debug("FdsChargeController: RTU enabled ")
         else:
             raise ValueError("Unsupported Modbus Communication Type. Choose MODBUS_RTU or MODBUS_ETH.")
+
 
     def connect(self):
         if self.communicationType == MODBUS_ETH:
@@ -80,14 +81,14 @@ class FdsChargeController:
                 # battery sense voltage, filtered
                 data[fds.LABEL_CC_BATTS_V] = rr.registers[24] * v_scale
                 data[fds.LABEL_CC_BATT_SENSED_V] = rr.registers[26] * v_scale
-                data[fds.LABEL_CC_BATTS_I] = rr.registers[28] * i_scale
-                data[fds.LABEL_CC_ARRAY_V] = rr.registers[27] * v_scale
-                data[fds.LABEL_CC_ARRAY_I] = rr.registers[29] * i_scale
-                data[fds.LABEL_CC_STATENUM] = rr.registers[50]
-                data[fds.LABEL_CC_HS_TEMP] = rr.registers[35]
-                data[fds.LABEL_CC_RTS_TEMP] = rr.registers[36]
-                data[fds.LABEL_CC_OUT_POWER] = rr.registers[58] * p_scale
-                data[fds.LABEL_CC_IN_POWER] = rr.registers[59] * p_scale
+                data[fds.LABEL_CC_BATTS_I]     = rr.registers[28] * i_scale
+                data[fds.LABEL_CC_ARRAY_V]     = rr.registers[27] * v_scale
+                data[fds.LABEL_CC_ARRAY_I]     = rr.registers[29] * i_scale
+                data[fds.LABEL_CC_STATENUM]    = rr.registers[50]
+                data[fds.LABEL_CC_HS_TEMP]     = rr.registers[35]
+                data[fds.LABEL_CC_RTS_TEMP]    = rr.registers[36]
+                data[fds.LABEL_CC_OUT_POWER]   = rr.registers[58] * p_scale
+                data[fds.LABEL_CC_IN_POWER]    = rr.registers[59] * p_scale
                 data[fds.LABEL_CC_MINVB_DAILY] = rr.registers[64] * v_scale
                 data[fds.LABEL_CC_MAXVB_DAILY] = rr.registers[65] * v_scale
                 data[fds.LABEL_CC_MINTB_DAILY] = rr.registers[71]
