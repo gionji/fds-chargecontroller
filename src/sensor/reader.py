@@ -36,6 +36,23 @@ class SensorValue:
             indent=4
         )
 
+    def stocazzo_format(self):
+        values = list()
+
+        device_type = self.value['type']
+
+        for label, value in self.value.items():
+            if label != 'type':
+                value_obj = json.dumps({
+                    "sensor_device" : device_type,
+                    "sensor_name" : label,
+                    "value_type" : str(type(value)),
+                    "value" : value
+                    })
+                values.append(value_obj)
+
+        return values
+
 
 
 class Reader(ABC):

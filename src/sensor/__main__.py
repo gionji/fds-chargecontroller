@@ -31,16 +31,19 @@ if __name__ == "__main__":
     }
 
     charge_controller = reader.ModbusChargeControllerReader( 'cc1',
+                                             unit_id = 0x02,
                                              produce_dummy_data = True)
 
 
 
     charge_controller_2 = reader.ModbusChargeControllerReader( 'cc2',
+                                             unit_id = 0x01,
                                              produce_dummy_data = True)
 
 
 
     relay_box = reader.ModbusRelayBoxReader( 'rb',
+                                             unit_id = 0x09,
                                              produce_dummy_data = True)
 
     while True:
@@ -51,11 +54,17 @@ if __name__ == "__main__":
         data3 = relay_box.read()
         #charge_controller.disconnect()
 
-        print(data1.pretty_format())
-        print(data2.pretty_format())
-        print(data3.pretty_format())
+        single_values_1 = data1.stocazzo_format()
+        single_values_2 = data2.stocazzo_format()
+        single_values_3 = data3.stocazzo_format()
 
-        # Publish the data
-        #mqtt_client.publish(IIoT.MqttChannels.sensors, readed_value.format() )
+        for v in single_values_1:
+            mqtt_client.publish(IIoT.MqttChannels.sensors, v )
+
+        for v in single_values_2:
+            mqtt_client.publish(IIoT.MqttChannels.sensors, v )
+
+        for v in single_values_3:
+            mqtt_client.publish(IIoT.MqttChannels.sensors, v )
 
         sleep(READING_INTERVAL)
