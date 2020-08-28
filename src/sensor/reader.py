@@ -43,11 +43,18 @@ class SensorValue:
 
         for label, value in self.value.items():
             if label != 'type':
+
+                value_type = str(type(value)).split("'")[1]
+
+                if value_type == 'str':
+                    value_type = 'string'
+
                 value_obj = json.dumps({
-                    "sensor_device" : device_type,
-                    "sensor_name" : label,
-                    "value_type" : str(type(value)),
-                    "value" : value
+                    "device" : device_type,
+                    "sensor" : label,
+                    "value_type" : value_type,
+                    "value" : value,
+                    "timestamp": self.timestamp
                     })
                 values.append(value_obj)
 
