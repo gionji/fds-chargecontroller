@@ -55,30 +55,28 @@ if __name__ == "__main__":
     while True:
         # Read the data
         # charge_controller.connect()
-        data1 = charge_controller.read()
-        data2 = charge_controller_2.read()
-        data3 = relay_box.read()
-        #charge_controller.disconnect()
+        data_cc_1 = charge_controller.read()
+        data_cc_2 = charge_controller_2.read()
+        data_rb = relay_box.read()
+        data_mcu = mcu.read()
 
-        data4 = mcu.read()
-
-        single_values_1 = data1.stocazzo_format()
-        single_values_2 = data2.stocazzo_format()
-        single_values_3 = data3.stocazzo_format()
-        single_values_4 = data4.stocazzo_format()
-
-        print(single_values_4)
+        single_values_data_cc_1 = data_cc_1.stocazzo_format()
+        single_values_data_cc_2 = data_cc_2.stocazzo_format()
+        single_values_data_rb = data_rb.stocazzo_format()
+        single_values_data_mcu = data_mcu.stocazzo_format()
 
 
-        '''
-        for v in single_values_1:
+        for v in single_values_data_cc_1:
             mqtt_client.publish(IIoT.MqttChannels.sensors, v )
 
-        for v in single_values_2:
+        for v in single_values_data_cc_2:
             mqtt_client.publish(IIoT.MqttChannels.sensors, v )
 
-        for v in single_values_3:
+        for v in single_values_data_rb:
             mqtt_client.publish(IIoT.MqttChannels.sensors, v )
-        '''
+
+        for v in single_values_data_mcu:
+            mqtt_client.publish(IIoT.MqttChannels.sensors, v )
+
 
         sleep(READING_INTERVAL)
