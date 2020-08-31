@@ -2,7 +2,9 @@ import json
 from datetime import datetime
 from time import sleep
 
-from sensor import reader
+from sensor import modbus_reader
+from sensor import mcu_arduino_reader
+
 from libs.utils import connector, IIoT
 
 import os
@@ -30,20 +32,24 @@ if __name__ == "__main__":
         IIoT.MqttChannels.sensors: 'sensors',
     }
 
-    charge_controller = reader.ModbusChargeControllerReader( 'cc1',
+    charge_controller = modbus_reader.ModbusChargeControllerReader( 'cc1',
                                              unit_id = 0x02,
                                              produce_dummy_data = True)
 
 
 
-    charge_controller_2 = reader.ModbusChargeControllerReader( 'cc2',
+    charge_controller_2 = modbus_reader.ModbusChargeControllerReader( 'cc2',
                                              unit_id = 0x01,
                                              produce_dummy_data = True)
 
 
 
-    relay_box = reader.ModbusRelayBoxReader( 'rb',
+    relay_box = modbus_reader.ModbusRelayBoxReader( 'rb',
                                              unit_id = 0x09,
+                                             produce_dummy_data = True)
+
+
+    mcu = mcu_arduino_reader.McuArduinoReader( 'mcu',
                                              produce_dummy_data = True)
 
     while True:
@@ -54,10 +60,17 @@ if __name__ == "__main__":
         data3 = relay_box.read()
         #charge_controller.disconnect()
 
+        data4 = mcu.read()
+
         single_values_1 = data1.stocazzo_format()
         single_values_2 = data2.stocazzo_format()
         single_values_3 = data3.stocazzo_format()
+        single_values_4 = data4.stocazzo_format()
 
+        print(single_values_4)
+
+
+        '''
         for v in single_values_1:
             mqtt_client.publish(IIoT.MqttChannels.sensors, v )
 
@@ -66,5 +79,6 @@ if __name__ == "__main__":
 
         for v in single_values_3:
             mqtt_client.publish(IIoT.MqttChannels.sensors, v )
+        '''
 
         sleep(READING_INTERVAL)
