@@ -36,6 +36,7 @@ class ModbusChargeControllerReader(Reader):
         self.produce_dummy_data = produce_dummy_data
         self.client             = None
 
+        self.connect()
 
     def connect(self):
         try:
@@ -76,8 +77,8 @@ class ModbusChargeControllerReader(Reader):
             data[fds.LABEL_CC_DIPSWITCHES] = bin(0x02)[::-1][:-2].zfill(8)
         else:
             try:
-                print('sono entrato dio merdoso!')
-                self.connect()
+                #print('sono entrato dio merdoso!')
+                #self.connect()
                 # read registers. Start at 0 for convenience
                 rr = self.client.read_holding_registers(0, 80, unit=self.unit_id)
 
@@ -145,6 +146,8 @@ class ModbusRelayBoxReader(Reader):
         self.produce_dummy_data = produce_dummy_data
         self.client             = None
 
+        #self.connect()
+
     def connect(self):
         try:
             print("Connect modbus...")
@@ -191,9 +194,10 @@ class ModbusRelayBoxReader(Reader):
 
         else:
             try:
-                self.connect()
+                #self.connect()
                 # read registers. Start at 0 for convenience
                 rr = self.client.read_holding_registers(0, 18, unit=self.unit_id)
+
                 v_scale = float(78.421 * 2 ** (-15))
 
                 data[fds.LABEL_RB_VB] = rr.registers[0] * v_scale
