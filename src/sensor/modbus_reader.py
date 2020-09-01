@@ -83,7 +83,7 @@ class ModbusChargeControllerReader(Reader):
 
                 print("CC modbus unit_id: " + str(self.unit_id) )
 
-                print('CC modbus regiter: ' + str( len(rr.registers) )
+                print('CC modbus regiter: ' + str( len(rr.registers) ))
 
                 # for all indexes, subtract 1 from what's in the manual
                 V_PU_hi, V_PU_lo, I_PU_hi, I_PU_lo = rr.registers
