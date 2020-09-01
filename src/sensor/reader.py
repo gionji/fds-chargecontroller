@@ -33,13 +33,13 @@ class SensorValue:
             indent=4
         )
 
+
     def stocazzo_format(self):
         values = list()
-
         device_type = self.value['type']
 
-        for label, value in self.value.items():
-            if label != 'type':
+        for key, value in self.value.items():
+            if key != 'type':
 
                 value_type = str(type(value)).split("'")[1]
 
@@ -48,7 +48,7 @@ class SensorValue:
 
                 value_obj = json.dumps({
                     "device" : device_type,
-                    "sensor" : label,
+                    "sensor" : key,
                     "value_type" : value_type,
                     "value" : value,
                     "timestamp": self.timestamp

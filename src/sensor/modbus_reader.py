@@ -5,7 +5,6 @@ import struct
 import logging
 import random
 
-
 from pymodbus.exceptions import ModbusIOException
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 
@@ -37,6 +36,7 @@ class ModbusChargeControllerReader(Reader):
         self.produce_dummy_data = produce_dummy_data
         self.client             = None
 
+
     def connect(self):
         try:
             print("Connect modbus...")
@@ -55,7 +55,7 @@ class ModbusChargeControllerReader(Reader):
     def get_charge_controller_data(self):
         data = {'type': 'charge_controller'}
 
-        if self.produce_dummy_data is True:
+        if self.produce_dummy_data == True:
             self.generate_dummy([
                 fds.LABEL_CC_BATTS_V,
                 fds.LABEL_CC_BATT_SENSED_V,
@@ -74,9 +74,9 @@ class ModbusChargeControllerReader(Reader):
             ], data)
 
             data[fds.LABEL_CC_DIPSWITCHES] = bin(0x02)[::-1][:-2].zfill(8)
-
         else:
             try:
+                print('sono entrato dio merdoso!')
                 self.connect()
                 # read registers. Start at 0 for convenience
                 rr = self.client.read_holding_registers(0, 80, unit=self.unit_id)
@@ -114,8 +114,6 @@ class ModbusChargeControllerReader(Reader):
             except Exception as e:
                 logging.error('Charge Controller: unpredicted exception')
                 raise e
-            finally:
-                self.disconnect()
 
         return data
 
@@ -125,14 +123,7 @@ class ModbusChargeControllerReader(Reader):
         return SensorValue(self.id, data, int(datetime.now().timestamp()))
 
 
-    def disconnect(self):
-        try:
-            self.client.disconnect()
-        except Exception as e:
-            err = 'Error in Modbus Disconnect: ' + str(e)
-            print( err )
-        finally:
-            self.client = None
+
 
 
 
@@ -171,7 +162,7 @@ class ModbusRelayBoxReader(Reader):
     def get_relay_box_data(self):
         data = {'type': 'relay_box'}
 
-        if self.produce_dummy_data is True:
+        if self.produce_dummy_data == True:
             self.generate_dummy([
                 fds.LABEL_RB_VB,
                 fds.LABEL_RB_ADC_VCH_1,
@@ -227,8 +218,6 @@ class ModbusRelayBoxReader(Reader):
             except Exception as e:
                 logging.error('Relay Box: unpredicted exception')
                 raise e
-            finally:
-                self.disconnect()
 
         return data
 

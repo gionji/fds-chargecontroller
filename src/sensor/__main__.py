@@ -11,72 +11,63 @@ import os
 
 
 ## parametri
-DEFAULT_READING_INTERVAL = 10
-DEFAULT_MODBUS_IP        = '192.168.2.253'
-DEFAULT_MODBUS_UNIT      = 1
-DEFAULT_DUMMY_DATA       = True
+READING_INTERVAL                = int(os.getenv('READING_INTERVAL', 10))
+MODBUS_IP                       = os.getenv('MODBUS_IP','192.168.2.253')
 
-READING_INTERVAL = os.getenv('READING_INTERVAL', DEFAULT_READING_INTERVAL)
-MODBUS_IP   = os.getenv('DEFAULT_MODBUS_IP', DEFAULT_MODBUS_IP)
-MODBUS_UNIT = os.getenv('DEFAULT_MODBUS_UNIT', DEFAULT_MODBUS_UNIT)
-DUMMY_DATA  = os.getenv('DEFAULT_DUMMY_DATA', DEFAULT_DUMMY_DATA)
+CHARGE_CONTROLLER_1_MODBUS_UNIT = os.getenv('CHARGE_CONTROLLER_1_MODBUS_UNIT', None) #0x1
+CHARGE_CONTROLLER_2_MODBUS_UNIT = os.getenv('CHARGE_CONTROLLER_2_MODBUS_UNIT', None)
+RELAY_BOX_MODBUS_UNIT           = os.getenv('RELAY_BOX_MODBUS_UNIT'          , None) #0x09
 
-## da variabili ambiente
+MCU_I2C_CHANNEL                 = os.getenv('MCU_I2C_CHANNEL', 1)
+MCU_ARDUINO_I2C_ADDRESS         = os.getenv('MCU_ARDUINO_I2C_ADDRESS', None) #0x27
+
+DUMMY_DATA                      = bool(os.getenv('DUMMY_DATA', False))
+
+
+def read_and_publish(data):
+    single_values_data = data.stocazzo_format()
+    for v in single_values_data:
+        mqtt_client.publish(IIoT.MqttChannels.sensors, v )
+
 
 if __name__ == "__main__":
     topics = [IIoT.MqttChannels.sensors]  # canali a cui mi sottoscrivo
     mqtt_client = connector.MqttLocalClient('SENSORS', 'localhost', 1883, topics)
-    mqtt_client.start()
+    # mqtt_client.start()
 
     topics_tables_mapper = {
         IIoT.MqttChannels.sensors: 'sensors',
     }
 
-    charge_controller = modbus_reader.ModbusChargeControllerReader( 'cc1',
-                                             unit_id = 0x02,
-                                             produce_dummy_data = True)
+    if CHARGE_CONTROLLER_1_MODBUS_UNIT != None:
+        charge_controller = modbus_reader.ModbusChargeControllerReader( 'cc1',
+                                             unit_id = CHARGE_CONTROLLER_1_MODBUS_UNIT,
+                                             produce_dummy_data = DUMMY_DATA)
 
+    if CHARGE_CONTROLLER_2_MODBUS_UNIT != None:
+        charge_controller_2 = modbus_reader.ModbusChargeControllerReader( 'cc2',
+                                            unit_id = CHARGE_CONTROLLER_2_MODBUS_UNIT,
+                                            produce_dummy_data = DUMMY_DATA)
 
+    if RELAY_BOX_MODBUS_UNIT != None:
+        relay_box = modbus_reader.ModbusRelayBoxReader( 'rb',
+                                                 unit_id = RELAY_BOX_MODBUS_UNIT,
+                                                 produce_dummy_data = DUMMY_DATA)
 
-    charge_controller_2 = modbus_reader.ModbusChargeControllerReader( 'cc2',
-                                             unit_id = 0x01,
-                                             produce_dummy_data = True)
+    if MCU_ARDUINO_I2C_ADDRESS != None:
+        mcu = mcu_arduino_reader.McuArduinoReader( 'mcu',
+                                                 produce_dummy_data = DUMMY_DATA)
 
-
-
-    relay_box = modbus_reader.ModbusRelayBoxReader( 'rb',
-                                             unit_id = 0x09,
-                                             produce_dummy_data = True)
-
-
-    mcu = mcu_arduino_reader.McuArduinoReader( 'mcu',
-                                             produce_dummy_data = True)
 
     while True:
         # Read the data
-        # charge_controller.connect()
-        data_cc_1 = charge_controller.read()
-        data_cc_2 = charge_controller_2.read()
-        data_rb = relay_box.read()
-        data_mcu = mcu.read()
-
-        single_values_data_cc_1 = data_cc_1.stocazzo_format()
-        single_values_data_cc_2 = data_cc_2.stocazzo_format()
-        single_values_data_rb = data_rb.stocazzo_format()
-        single_values_data_mcu = data_mcu.stocazzo_format()
-
-
-        for v in single_values_data_cc_1:
-            mqtt_client.publish(IIoT.MqttChannels.sensors, v )
-
-        for v in single_values_data_cc_2:
-            mqtt_client.publish(IIoT.MqttChannels.sensors, v )
-
-        for v in single_values_data_rb:
-            mqtt_client.publish(IIoT.MqttChannels.sensors, v )
-
-        for v in single_values_data_mcu:
-            mqtt_client.publish(IIoT.MqttChannels.sensors, v )
-
+        if CHARGE_CONTROLLER_1_MODBUS_UNIT != None:
+            read_and_publish(charge_controller.read())
+        if CHARGE_CONTROLLER_2_MODBUS_UNIT != None:
+            read_and_publish(charge_controller_2.read())
+        if RELAY_BOX_MODBUS_UNIT != None:
+            read_and_publish(relay_box.read())
+        if MCU_ARDUINO_I2C_ADDRESS != None:
+            read_and_publish(mcu.read())
 
         sleep(READING_INTERVAL)
