@@ -81,19 +81,18 @@ class ModbusChargeControllerReader(Reader):
                 # read registers. Start at 0 for convenience
                 rr = self.client.read_holding_registers(0, 80, unit=self.unit_id)
 
-                print("CC modbus unit_id: " + str(self.unit_id) )
-
-                print('CC modbus regiter: ' + str( len(rr.registers) ))
-
                 # for all indexes, subtract 1 from what's in the manual
-                V_PU_hi, V_PU_lo, I_PU_hi, I_PU_lo = rr.registers
+                V_PU_hi = rr.registers[0]
+                V_PU_lo = rr.registers[1]
+                I_PU_hi = rr.registers[2]
+                I_PU_lo = rr.registers[3]
 
                 V_PU = float(V_PU_hi) + float(V_PU_lo)
                 I_PU = float(I_PU_hi) + float(I_PU_lo)
 
-                v_scale = V_PU * 2 ** (-15)
-                i_scale = I_PU * 2 ** (-15)
-                p_scale = V_PU * I_PU * 2 ** (-17)
+                v_scale = V_PU * 2**(-15)
+                i_scale = I_PU * 2**(-15)
+                p_scale = V_PU * I_PU * 2**(-17)
 
                 # battery sense voltage, filtered
                 data[fds.LABEL_CC_BATTS_V] = rr.registers[24] * v_scale
