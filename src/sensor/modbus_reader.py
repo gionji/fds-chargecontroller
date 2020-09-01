@@ -81,6 +81,10 @@ class ModbusChargeControllerReader(Reader):
                 # read registers. Start at 0 for convenience
                 rr = self.client.read_holding_registers(0, 80, unit=self.unit_id)
 
+                print("CC modbus unit_id: " + str(self.unit_id) )
+
+                print('CC modbus regiter: ' + str( len(rr.registers) )
+
                 # for all indexes, subtract 1 from what's in the manual
                 V_PU_hi, V_PU_lo, I_PU_hi, I_PU_lo = rr.registers
 
