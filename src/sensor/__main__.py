@@ -14,14 +14,14 @@ import os
 READING_INTERVAL                = int(os.getenv('READING_INTERVAL', 10))
 MODBUS_IP                       = os.getenv('MODBUS_IP','192.168.2.253')
 
-CHARGE_CONTROLLER_1_MODBUS_UNIT = int(os.getenv('CHARGE_CONTROLLER_1_MODBUS_UNIT', None)) #0x1
-CHARGE_CONTROLLER_2_MODBUS_UNIT = int(os.getenv('CHARGE_CONTROLLER_2_MODBUS_UNIT', None))
-RELAY_BOX_MODBUS_UNIT           = int(os.getenv('RELAY_BOX_MODBUS_UNIT'          , None)) #0x09
+CHARGE_CONTROLLER_1_MODBUS_UNIT = os.getenv('CHARGE_CONTROLLER_1_MODBUS_UNIT', None) #0x1
+CHARGE_CONTROLLER_2_MODBUS_UNIT = os.getenv('CHARGE_CONTROLLER_2_MODBUS_UNIT', None)
+RELAY_BOX_MODBUS_UNIT           = os.getenv('RELAY_BOX_MODBUS_UNIT'          , None) #0x09
 
 MCU_I2C_CHANNEL                 = os.getenv('MCU_I2C_CHANNEL', 1)
-MCU_ARDUINO_I2C_ADDRESS         = int(os.getenv('MCU_ARDUINO_I2C_ADDRESS', None)) #0x27
+MCU_ARDUINO_I2C_ADDRESS         = os.getenv('MCU_ARDUINO_I2C_ADDRESS', None) #0x27
 
-DUMMY_DATA                      = bool(os.getenv('DUMMY_DATA', False))
+DUMMY_DATA                      = bool(os.getenv('DUMMY_DATA', False)
 
 
 def read_and_publish(data):
@@ -41,17 +41,17 @@ if __name__ == "__main__":
 
     if CHARGE_CONTROLLER_1_MODBUS_UNIT != None:
         charge_controller = modbus_reader.ModbusChargeControllerReader( 'cc1',
-                                             unit_id = CHARGE_CONTROLLER_1_MODBUS_UNIT,
+                                             unit_id = int(CHARGE_CONTROLLER_1_MODBUS_UNIT),
                                              produce_dummy_data = DUMMY_DATA)
 
     if CHARGE_CONTROLLER_2_MODBUS_UNIT != None:
         charge_controller_2 = modbus_reader.ModbusChargeControllerReader( 'cc2',
-                                            unit_id = CHARGE_CONTROLLER_2_MODBUS_UNIT,
+                                            unit_id = int(CHARGE_CONTROLLER_2_MODBUS_UNIT),
                                             produce_dummy_data = DUMMY_DATA)
 
     if RELAY_BOX_MODBUS_UNIT != None:
         relay_box = modbus_reader.ModbusRelayBoxReader( 'rb',
-                                                 unit_id = RELAY_BOX_MODBUS_UNIT,
+                                                 unit_id = int(RELAY_BOX_MODBUS_UNIT),
                                                  produce_dummy_data = DUMMY_DATA)
 
     if MCU_ARDUINO_I2C_ADDRESS != None:
