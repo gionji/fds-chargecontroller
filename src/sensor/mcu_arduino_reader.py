@@ -68,7 +68,7 @@ class McuArduinoReader(Reader):
         self.i2c_address = i2c_address
 
         if self.produce_dummy_data  == False:
-            self.bus = smbus2.SMBus(bus_id)
+            self.bus = smbus2.SMBus(self.i2c_bus)
 
     def is_connected(self, arduino_address):
         # print("Arduino ", str(arduinoAddress), " isConnected")
