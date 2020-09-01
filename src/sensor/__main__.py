@@ -21,7 +21,7 @@ RELAY_BOX_MODBUS_UNIT           = os.getenv('RELAY_BOX_MODBUS_UNIT'          , N
 MCU_I2C_CHANNEL                 = os.getenv('MCU_I2C_CHANNEL', 1)
 MCU_ARDUINO_I2C_ADDRESS         = os.getenv('MCU_ARDUINO_I2C_ADDRESS', None) #0x27
 
-DUMMY_DATA                      = bool(os.getenv('DUMMY_DATA', False)
+DUMMY_DATA                      = bool(os.getenv('DUMMY_DATA', False))
 
 
 def read_and_publish(data):
