@@ -11,6 +11,10 @@ import os
 
 
 ## parametri
+MQTT_HOSTNAME = os.getenv('MQTT_HOSTNAME', 'mosquitto')
+MQTT_PORT = os.getenv('MQTT_PORT', '1883')
+MQTT_CLIENT_ID = os.getenv('MQTT_CLIENT_ID', 'CHARGE_CONTROLLER_1')
+
 READING_INTERVAL                = int(os.getenv('READING_INTERVAL', 10))
 MODBUS_IP                       = os.getenv('MODBUS_IP','192.168.2.253')
 
@@ -34,8 +38,8 @@ def read_and_publish(data):
 
 if __name__ == "__main__":
     topics = [IIoT.MqttChannels.sensors]  # canali a cui mi sottoscrivo
-    mqtt_client = connector.MqttLocalClient('SENSORS', 'localhost', 1883, topics)
-    # mqtt_client.start()
+    mqtt_client = connector.MqttLocalClient(MQTT_CLIENT_ID, MQTT_HOSTNAME, int(MQTT_PORT), topics)
+    mqtt_client.start()
 
     topics_tables_mapper = {
         IIoT.MqttChannels.sensors: 'sensors',
