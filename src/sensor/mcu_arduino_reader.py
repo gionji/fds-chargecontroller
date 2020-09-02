@@ -56,6 +56,8 @@ ARDUINO_FLOAT_SIZE = 4
 ARDUINO_INT_SIZE = 2
 ARDUINO_DOUBLE_SIZE = 8
 
+DECIMALS = 1
+
 
 class McuArduinoReader(Reader):
 
@@ -85,7 +87,7 @@ class McuArduinoReader(Reader):
         b = struct.pack('4B', *value)
         value = struct.unpack('<f', b)
 
-        return value[0]
+        return round(value[0], DECIMALS)
 
     def __read2_bytes_integer(self, dev, start_reg, n_bytes=None):
         value = [0, 0]
@@ -225,6 +227,7 @@ class McuArduinoReader(Reader):
                 data[AC2_CURRENT_LABEL] = self.get_ac_current(2)
             except Exception as e:
                 logging.error('Charge Controller: unpredicted exception')
+                print( e )
                 raise e
 
         return data

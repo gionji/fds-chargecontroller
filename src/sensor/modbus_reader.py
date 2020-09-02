@@ -21,6 +21,8 @@ DEFAULT_MODBUS_PORT            = 502
 DEFAULT_MODBUS_IP            = '192.168.2.253'
 DEFAULT_C23_RS485            = '/dev/ttymxc2'  # mxc3 on schematics
 
+DECIMALS = 1
+
 # Modbus reader
 class ModbusChargeControllerReader(Reader):
 
@@ -49,7 +51,7 @@ class ModbusChargeControllerReader(Reader):
 
     def generate_dummy(self, values, data):
         for val in values:
-            data[val] = random.uniform(0, 60)
+            data[val] = round(random.uniform(0, 60), DECIMALS)
 
 
     def get_charge_controller_data(self):
@@ -95,27 +97,27 @@ class ModbusChargeControllerReader(Reader):
                 p_scale = V_PU * I_PU * 2**(-17)
 
                 # battery sense voltage, filtered
-                data[fds.LABEL_CC_BATTS_V] = rr.registers[24] * v_scale
-                data[fds.LABEL_CC_BATT_SENSED_V] = rr.registers[26] * v_scale
-                data[fds.LABEL_CC_BATTS_I]     = rr.registers[28] * i_scale
-                data[fds.LABEL_CC_ARRAY_V]     = rr.registers[27] * v_scale
-                data[fds.LABEL_CC_ARRAY_I]     = rr.registers[29] * i_scale
-                data[fds.LABEL_CC_STATENUM]    = rr.registers[50]
-                data[fds.LABEL_CC_HS_TEMP]     = rr.registers[35]
-                data[fds.LABEL_CC_RTS_TEMP]    = rr.registers[36]
-                data[fds.LABEL_CC_OUT_POWER]   = rr.registers[58] * p_scale
-                data[fds.LABEL_CC_IN_POWER]    = rr.registers[59] * p_scale
-                data[fds.LABEL_CC_MINVB_DAILY] = rr.registers[64] * v_scale
-                data[fds.LABEL_CC_MAXVB_DAILY] = rr.registers[65] * v_scale
-                data[fds.LABEL_CC_MINTB_DAILY] = rr.registers[71]
-                data[fds.LABEL_CC_MAXTB_DAILY] = rr.registers[72]
-                data[fds.LABEL_CC_DIPSWITCHES] = bin(rr.registers[48])[::-1][:-2].zfill(8)
+                data[fds.LABEL_CC_BATTS_V]       = round( rr.registers[24] * v_scale, DECIMALS )
+                data[fds.LABEL_CC_BATT_SENSED_V] = round(rr.registers[26] * v_scale, DECIMALS )
+                data[fds.LABEL_CC_BATTS_I]       = round(rr.registers[28] * i_scale, DECIMALS )
+                data[fds.LABEL_CC_ARRAY_V]       = round(rr.registers[27] * v_scale, DECIMALS )
+                data[fds.LABEL_CC_ARRAY_I]       = round(rr.registers[29] * i_scale, DECIMALS )
+                data[fds.LABEL_CC_STATENUM]      = round(rr.registers[50], DECIMALS )
+                data[fds.LABEL_CC_HS_TEMP]       = round(rr.registers[35], DECIMALS )
+                data[fds.LABEL_CC_RTS_TEMP]      = round(rr.registers[36], DECIMALS )
+                data[fds.LABEL_CC_OUT_POWER]     = round(rr.registers[58] * p_scale, DECIMALS )
+                data[fds.LABEL_CC_IN_POWER]      = round(rr.registers[59] * p_scale, DECIMALS )
+                data[fds.LABEL_CC_MINVB_DAILY]   = round(rr.registers[64] * v_scale, DECIMALS )
+                data[fds.LABEL_CC_MAXVB_DAILY]   = round(rr.registers[65] * v_scale, DECIMALS )
+                data[fds.LABEL_CC_MINTB_DAILY]   = round(rr.registers[71], DECIMALS )
+                data[fds.LABEL_CC_MAXTB_DAILY]   = round(rr.registers[72] , DECIMALS )
+                data[fds.LABEL_CC_DIPSWITCHES]   = bin(rr.registers[48])[::-1][:-2].zfill(8)
                 # led_state            = rr.registers
             except ModbusIOException as e:
-                logging.error('Charge Controller: modbusIOException')
+                logging.error('Charge Controller: modbusIOException'+ str(e))
                 raise e
             except Exception as e:
-                logging.error('Charge Controller: unpredicted exception')
+                logging.error('Charge Controller: unpredicted exception'+ str(e))
                 raise e
             finally:
                 self.disconnect()
@@ -171,7 +173,7 @@ class ModbusRelayBoxReader(Reader):
 
     def generate_dummy(self, values, data):
         for val in values:
-            data[val] = random.uniform(0, 60)
+            data[val] = round(random.uniform(0, 60), DECIMALS)
 
 
 
@@ -210,30 +212,30 @@ class ModbusRelayBoxReader(Reader):
 
                 v_scale = float(78.421 * 2 ** (-15))
 
-                data[fds.LABEL_RB_VB] = rr.registers[0] * v_scale
-                data[fds.LABEL_RB_ADC_VCH_1] = rr.registers[1] * v_scale
-                data[fds.LABEL_RB_ADC_VCH_2] = rr.registers[2] * v_scale
-                data[fds.LABEL_RB_ADC_VCH_3] = rr.registers[3] * v_scale
-                data[fds.LABEL_RB_ADC_VCH_4] = rr.registers[4] * v_scale
-                data[fds.LABEL_RB_T_MOD] = rr.registers[5]
+                data[fds.LABEL_RB_VB]            = round( rr.registers[0] * v_scale , DECIMALS )
+                data[fds.LABEL_RB_ADC_VCH_1]     = round( rr.registers[1] * v_scale , DECIMALS )
+                data[fds.LABEL_RB_ADC_VCH_2]     = round( rr.registers[2] * v_scale , DECIMALS )
+                data[fds.LABEL_RB_ADC_VCH_3]     = round( rr.registers[3] * v_scale , DECIMALS )
+                data[fds.LABEL_RB_ADC_VCH_4]     = round( rr.registers[4] * v_scale , DECIMALS )
+                data[fds.LABEL_RB_T_MOD]         = rr.registers[5]
                 data[fds.LABEL_RB_GLOBAL_FAULTS] = rr.registers[6]
                 data[fds.LABEL_RB_GLOBAL_ALARMS] = rr.registers[7]
-                data[fds.LABEL_RB_HOURMETER_HI] = rr.registers[8]
-                data[fds.LABEL_RB_HOURMETER_LO] = rr.registers[9]
-                data[fds.LABEL_RB_CH_FAULTS_1] = rr.registers[10]
-                data[fds.LABEL_RB_CH_FAULTS_2] = rr.registers[11]
-                data[fds.LABEL_RB_CH_FAULTS_3] = rr.registers[12]
-                data[fds.LABEL_RB_CH_FAULTS_4] = rr.registers[13]
-                data[fds.LABEL_RB_CH_ALARMS_1] = rr.registers[14]
-                data[fds.LABEL_RB_CH_ALARMS_2] = rr.registers[15]
-                data[fds.LABEL_RB_CH_ALARMS_3] = rr.registers[16]
-                data[fds.LABEL_RB_CH_ALARMS_4] = rr.registers[17]
+                data[fds.LABEL_RB_HOURMETER_HI]  = rr.registers[8]
+                data[fds.LABEL_RB_HOURMETER_LO]  = rr.registers[9]
+                data[fds.LABEL_RB_CH_FAULTS_1]   = rr.registers[10]
+                data[fds.LABEL_RB_CH_FAULTS_2]   = rr.registers[11]
+                data[fds.LABEL_RB_CH_FAULTS_3]   = rr.registers[12]
+                data[fds.LABEL_RB_CH_FAULTS_4]   = rr.registers[13]
+                data[fds.LABEL_RB_CH_ALARMS_1]   = rr.registers[14]
+                data[fds.LABEL_RB_CH_ALARMS_2]   = rr.registers[15]
+                data[fds.LABEL_RB_CH_ALARMS_3]   = rr.registers[16]
+                data[fds.LABEL_RB_CH_ALARMS_4]   = rr.registers[17]
                 # led_state            = rr.registers
             except ModbusIOException as e:
-                logging.error('Relay Box: modbusIOException')
+                logging.error('Relay Box: modbusIOException'+ str(e))
                 raise e
             except Exception as e:
-                logging.error('Relay Box: unpredicted exception')
+                logging.error('Relay Box: unpredicted exception: ' + str(e) )
                 raise e
             finally:
                 self.disconnect()
