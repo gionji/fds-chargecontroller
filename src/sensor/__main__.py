@@ -85,12 +85,27 @@ if __name__ == "__main__":
 
         # Read the data
         if CHARGE_CONTROLLER_1_MODBUS_UNIT != None:
-            read_and_publish(charge_controller.read())
+            try:
+                read_and_publish( charge_controller.read() )
+            except Exception as e:
+                print( e )
+
         if CHARGE_CONTROLLER_2_MODBUS_UNIT != None:
-            read_and_publish(charge_controller_2.read())
+            try:
+                read_and_publish( charge_controller_2.read() )
+            except Exception as e:
+                print( e )
+
         if RELAY_BOX_MODBUS_UNIT != None:
-            read_and_publish(relay_box.read())
+            try:
+                read_and_publish( relay_box.read() )
+            except Exception as e:
+                print( e )
+
         if MCU_ARDUINO_I2C_ADDRESS != None:
-            read_and_publish(mcu.read())
+            try:
+                read_and_publish( mcu.read() )
+            except Exception as e:
+                print( e )
 
         sleep(READING_INTERVAL)

@@ -117,7 +117,7 @@ class ModbusChargeControllerReader(Reader):
             except Exception as e:
                 logging.error('Charge Controller: unpredicted exception')
                 raise e
-            finally
+            finally:
                 self.disconnect()
 
         return data
@@ -235,7 +235,7 @@ class ModbusRelayBoxReader(Reader):
             except Exception as e:
                 logging.error('Relay Box: unpredicted exception')
                 raise e
-            finally
+            finally:
                 self.disconnect()
 
         return data
