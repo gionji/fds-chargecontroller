@@ -36,8 +36,6 @@ class ModbusChargeControllerReader(Reader):
         self.produce_dummy_data = produce_dummy_data
         self.client             = None
 
-        self.connect()
-
     def connect(self):
         try:
             print("Connect modbus...")
@@ -46,12 +44,13 @@ class ModbusChargeControllerReader(Reader):
         except Exception as e:
             err = 'Error in Modbus Connect: ' + str(e)
             self.client = None
-            print( err )
+            raise e
 
 
     def generate_dummy(self, values, data):
         for val in values:
             data[val] = random.uniform(0, 60)
+
 
     def get_charge_controller_data(self):
         data = {'type': 'charge_controller'}
@@ -78,7 +77,7 @@ class ModbusChargeControllerReader(Reader):
         else:
             try:
                 #print('sono entrato dio merdoso!')
-                #self.connect()
+                self.connect()
                 # read registers. Start at 0 for convenience
                 rr = self.client.read_holding_registers(0, 80, unit=self.unit_id)
 
@@ -118,6 +117,8 @@ class ModbusChargeControllerReader(Reader):
             except Exception as e:
                 logging.error('Charge Controller: unpredicted exception')
                 raise e
+            finally
+                self.disconnect()
 
         return data
 
@@ -126,6 +127,15 @@ class ModbusChargeControllerReader(Reader):
         data = self.get_charge_controller_data()
         return SensorValue(self.id, data, int(datetime.now().timestamp()))
 
+
+    def disconnect(self):
+        try:
+            self.client.close()
+        except Exception as e:
+            err = 'Error in Modbus Disconnect: ' + str(e)
+            raise e
+        finally:
+            self.client = None
 
 
 
@@ -194,7 +204,7 @@ class ModbusRelayBoxReader(Reader):
 
         else:
             try:
-                #self.connect()
+                self.connect()
                 # read registers. Start at 0 for convenience
                 rr = self.client.read_holding_registers(0, 18, unit=self.unit_id)
 
@@ -225,6 +235,8 @@ class ModbusRelayBoxReader(Reader):
             except Exception as e:
                 logging.error('Relay Box: unpredicted exception')
                 raise e
+            finally
+                self.disconnect()
 
         return data
 
@@ -236,9 +248,9 @@ class ModbusRelayBoxReader(Reader):
 
     def disconnect(self):
         try:
-            self.client.disconnect()
+            self.client.close()
         except Exception as e:
             err = 'Error in Modbus Disconnect: ' + str(e)
-            print( err )
+            raise e
         finally:
             self.client = None

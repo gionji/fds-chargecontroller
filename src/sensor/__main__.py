@@ -25,10 +25,12 @@ DUMMY_DATA                      = bool(os.getenv('DUMMY_DATA', False))
 
 
 def read_and_publish(data):
-    single_values_data = data.stocazzo_format()
-    for v in single_values_data:
-        mqtt_client.publish(IIoT.MqttChannels.sensors, v )
-
+    try:
+        single_values_data = data.stocazzo_format()
+        for v in single_values_data:
+            mqtt_client.publish(IIoT.MqttChannels.sensors, v )
+    except Exception as e:
+        print( e )
 
 if __name__ == "__main__":
     topics = [IIoT.MqttChannels.sensors]  # canali a cui mi sottoscrivo
@@ -39,27 +41,44 @@ if __name__ == "__main__":
         IIoT.MqttChannels.sensors: 'sensors',
     }
 
+
     if CHARGE_CONTROLLER_1_MODBUS_UNIT != None:
-        charge_controller = modbus_reader.ModbusChargeControllerReader( 'cc1',
+        try:
+            charge_controller = modbus_reader.ModbusChargeControllerReader( 'cc1',
                                              unit_id = int(CHARGE_CONTROLLER_1_MODBUS_UNIT),
                                              produce_dummy_data = DUMMY_DATA)
+        except Exception as e:
+            print( e )
+
 
     if CHARGE_CONTROLLER_2_MODBUS_UNIT != None:
-        charge_controller_2 = modbus_reader.ModbusChargeControllerReader( 'cc2',
+        try:
+            charge_controller_2 = modbus_reader.ModbusChargeControllerReader( 'cc2',
                                             unit_id = int(CHARGE_CONTROLLER_2_MODBUS_UNIT),
                                             produce_dummy_data = DUMMY_DATA)
+       except Exception as e:
+           print( e )
+
 
     if RELAY_BOX_MODBUS_UNIT != None:
-        relay_box = modbus_reader.ModbusRelayBoxReader( 'rb',
+        try:
+            relay_box = modbus_reader.ModbusRelayBoxReader( 'rb',
                                                  unit_id = int(RELAY_BOX_MODBUS_UNIT),
                                                  produce_dummy_data = DUMMY_DATA)
+        except Exception as e:
+            print( e )
+
 
     if MCU_ARDUINO_I2C_ADDRESS != None:
-        mcu = mcu_arduino_reader.McuArduinoReader( 'mcu',
+        try:
+            mcu = mcu_arduino_reader.McuArduinoReader( 'mcu',
                                                  produce_dummy_data = DUMMY_DATA)
+        except Exception as e:
+            print( e )
 
 
     while True:
+
         # Read the data
         if CHARGE_CONTROLLER_1_MODBUS_UNIT != None:
             read_and_publish(charge_controller.read())
