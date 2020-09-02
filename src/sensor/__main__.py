@@ -56,7 +56,7 @@ if __name__ == "__main__":
             charge_controller_2 = modbus_reader.ModbusChargeControllerReader( 'cc2',
                                             unit_id = int(CHARGE_CONTROLLER_2_MODBUS_UNIT),
                                             produce_dummy_data = DUMMY_DATA)
-       except Exception as e:
+        except Exception as e:
            print( e )
 
 
