@@ -76,7 +76,7 @@ class McuArduinoReader(Reader):
         # print("Arduino ", str(arduinoAddress), " isConnected")
         return True
 
-    def __read4_bytes_float(self, dev, start_reg, n_bytes=None):
+    def read4_bytes_float(self, dev, start_reg, n_bytes=None):
         value = [0, 0, 0, 0]
 
         value[0] = self.bus.read_byte_data(dev, start_reg)
@@ -89,7 +89,7 @@ class McuArduinoReader(Reader):
 
         return round(value[0], DECIMALS)
 
-    def __read2_bytes_integer(self, dev, start_reg, n_bytes=None):
+    def read2_bytes_integer(self, dev, start_reg, n_bytes=None):
         value = [0, 0]
 
         value[0] = self.bus.read_byte_data(dev, start_reg)
@@ -100,11 +100,11 @@ class McuArduinoReader(Reader):
 
         return value[0]
 
-    def __read1_byte_boolean(self, dev, start_reg):
+    def read1_byte_boolean(self, dev, start_reg):
         value = self.bus.read_byte_data(dev, start_reg)
         return value
 
-    def __generate_dummy(self, values, data):
+    def generate_dummy(self, values, data):
         for val in values:
             data[val] = random.uniform(0, 255)
 
@@ -115,49 +115,49 @@ class McuArduinoReader(Reader):
     # External MCU
     def get_temperature1(self):
         logging.debug("Requested temperature 1")
-        value = self.read4_bytes_float(I2C_ADDR, TEMP_1_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, TEMP_1_REGISTER, ARDUINO_FLOAT_SIZE)
         return value
 
     # External MCU
     def get_temperature2(self):
         logging.debug("Requested temperature 2")
-        value = self.read4_bytes_float(I2C_ADDR, TEMP_2_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, TEMP_2_REGISTER, ARDUINO_FLOAT_SIZE)
         return value
 
     # External MCU
     def get_temperature3(self):
         logging.debug("Requested temperature 2")
-        value = self.read4_bytes_float(I2C_ADDR, TEMP_3_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, TEMP_3_REGISTER, ARDUINO_FLOAT_SIZE)
         return value
 
     def get_pressure_in(self):
         logging.debug("Requested pressure in input")
-        value = self.read4_bytes_float(I2C_ADDR, PRESSURE_IN_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, PRESSURE_IN_REGISTER, ARDUINO_FLOAT_SIZE)
         return value
 
     def get_pressure_middle(self):
         logging.debug("Requested pressure in middle")
-        value = self.read4_bytes_float(I2C_ADDR, PRESSURE_MIDDLE_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, PRESSURE_MIDDLE_REGISTER, ARDUINO_FLOAT_SIZE)
         return value
 
     def get_pressure_out(self):
         logging.debug("Requested pressure in output")
-        value = self.read4_bytes_float(I2C_ADDR, PRESSURE_OUT_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, PRESSURE_OUT_REGISTER, ARDUINO_FLOAT_SIZE)
         return value
 
     def get_water_flux_in(self):
         logging.debug("Requested water flux in")
-        value = self.read2_bytes_integer(I2C_ADDR, FLUX_IN_REGISTER, ARDUINO_INT_SIZE)
+        value = self.read2_bytes_integer(self.i2c_address, FLUX_IN_REGISTER, ARDUINO_INT_SIZE)
         return value
 
     def get_water_flux_out(self):
         logging.debug("Requested water flux ouy")
-        value = self.read2_bytes_integer(I2C_ADDR, FLUX_OUT_REGISTER, ARDUINO_INT_SIZE)
+        value = self.read2_bytes_integer(self.i2c_address, FLUX_OUT_REGISTER, ARDUINO_INT_SIZE)
         return value
 
     def get_cc_current(self):
         logging.debug("Requested CC current from Shunt")
-        value = self.read4_bytes_float(I2C_ADDR, CC_CURRENT_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, CC_CURRENT_REGISTER, ARDUINO_FLOAT_SIZE)
         return value
 
     def get_ac_current(self, channel):
@@ -170,28 +170,28 @@ class McuArduinoReader(Reader):
         else:
             return -1
 
-        value = self.read4_bytes_float(I2C_ADDR, AC_CURRENT_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, AC_CURRENT_REGISTER, ARDUINO_FLOAT_SIZE)
 
         return value
 
     def get_dht11_temperature(self):
         logging.debug("Requested internal temperature by DHT11")
-        value = self.read4_bytes_float(I2C_ADDR, DHT11_AIR_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, DHT11_AIR_REGISTER, ARDUINO_FLOAT_SIZE)
         return value
 
     def get_dht11_humidity(self):
         logging.debug("Requested internal temperature by DHT11")
-        value = self.read4_bytes_float(I2C_ADDR, DHT11_HUMIDITY_REGISTER, ARDUINO_FLOAT_SIZE)
+        value = self.read4_bytes_float(self.i2c_address, DHT11_HUMIDITY_REGISTER, ARDUINO_FLOAT_SIZE)
         return value
 
     def get_flood_status(self):
         logging.debug("Requested flooding status")
-        value = self.read1_byte_boolean(I2C_ADDR, FLOODING_STATUS_REGISTER)
+        value = self.read1_byte_boolean(self.i2c_address, FLOODING_STATUS_REGISTER)
         return value
 
     def get_water_level(self):
         logging.debug("Requested tank water level")
-        value = self.read2_bytes_integer(I2C_ADDR, WATER_LEVEL_REGISTER, ARDUINO_INT_SIZE)
+        value = self.read2_bytes_integer(self.i2c_address, WATER_LEVEL_REGISTER, ARDUINO_INT_SIZE)
         return value
 
     def get_all_data(self):
