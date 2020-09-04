@@ -15,6 +15,7 @@ class MqttLocalClient(threading.Thread):
         self.subscription_paths = subscription_paths
         self.message_queue = queue.Queue()
         self.client = mqtt.Client(client_id=self.client_id)
+        self.callback = None
 
     def publish(self, topic, payload, ):
         print('[MQTT_CLIENT] publish to ' + topic + ' payload: ' + payload)
@@ -34,7 +35,10 @@ class MqttLocalClient(threading.Thread):
 
     def on_message(self, client, obj, msg):
         if msg is not None:
-            self.message_queue.put(msg)
+            if self.callback is None:
+                self.message_queue.put(msg)
+            else:
+                self.callback(msg)
 
     def subscribe_all(self, subscription_paths=None, qos=1):
         if subscription_paths is None:
@@ -43,3 +47,6 @@ class MqttLocalClient(threading.Thread):
             print('[MQTT_CLIENT] subscribe to ' + path)
             self.client.subscribe(path, qos=qos)
             time.sleep(0.5)
+
+    def set_callback(self, callback):
+        self.set_callback( callback)

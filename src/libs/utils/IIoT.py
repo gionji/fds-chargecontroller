@@ -5,6 +5,7 @@ class MqttChannels:
     telemetry = "/telemetry"
     gui = "/gui"
     actuators = "/actuators"
+    configurations = "/configurations"
 
 
 MQTT_PORT = 1883
