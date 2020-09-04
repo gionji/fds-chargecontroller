@@ -53,7 +53,7 @@ class Sensors():
         configs = configparser.ConfigParser()
         configs.read( CONFIG_FILE )
 
-        if configs['READING_INTERVAL'] is '':
+        if not configs.has_option('DEFAULT', 'READING_INTERVAL'):
             self.read_properties_from_env()
         else:
             self.read_properites_from_file()
