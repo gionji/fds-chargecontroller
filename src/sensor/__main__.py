@@ -42,7 +42,7 @@ class Sensors():
 
     def __init__(self):
 
-        self.configurations = None
+        self.configurations = {}
 
         self.charge_controller = None
         self.charge_controller_2 = None
@@ -221,7 +221,7 @@ if __name__ == "__main__":
 
     topics = ["/configurations"]
     mqtt_client = connector.MqttLocalClient(MQTT_CLIENT_ID, MQTT_HOSTNAME, int(MQTT_PORT), topics)
-    mqtt_client.setCallback( sensors.on_configuration_message_callback() )
+    mqtt_client.set_callback( sensors.on_configuration_message_callback() )
     mqtt_client.start()
 
     topics_tables_mapper = {
