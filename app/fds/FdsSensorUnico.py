@@ -4,8 +4,9 @@ import smbus2
 import struct
 import logging
 
+from .FdsCommon import FdsCommon as fds
+
 # I2C addressed of Arduinos MCU connected
-import fds.FdsCommon as fds
 
 I2C_ADDR = 0x27
 

@@ -3,12 +3,6 @@ from abc import abstractmethod, ABC
 from datetime import datetime
 from random import randrange
 
-import random
-import logging
-
-import fds.FdsCommon as fds
-
-
 
 class SensorValue:
 
@@ -33,7 +27,6 @@ class SensorValue:
             indent=4
         )
 
-
     def stocazzo_format(self):
         values = list()
         device_type = self.value['type']
@@ -47,16 +40,15 @@ class SensorValue:
                     value_type = 'string'
 
                 value_obj = json.dumps({
-                    "device" : device_type,
-                    "sensor" : key,
-                    "value_type" : value_type,
-                    "value" : value,
+                    "device": device_type,
+                    "sensor": key,
+                    "value_type": value_type,
+                    "value": value,
                     "timestamp": self.timestamp
-                    })
+                })
                 values.append(value_obj)
 
         return values
-
 
 
 class Reader(ABC):

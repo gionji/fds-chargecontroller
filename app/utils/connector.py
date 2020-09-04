@@ -49,4 +49,4 @@ class MqttLocalClient(threading.Thread):
             time.sleep(0.5)
 
     def set_callback(self, callback):
-        self.set_callback( callback)
+        self.callback = callback

@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 import time
 
-from fds.FdsSensorUnico import FdsSensor
+from .FdsSensorUnico import FdsSensor
 
 
 class Board(ABC):

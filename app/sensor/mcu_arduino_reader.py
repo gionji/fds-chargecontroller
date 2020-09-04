@@ -6,10 +6,8 @@ import logging
 import random
 
 # I2C addressed of Arduinos MCU connected
-import fds.FdsCommon as fds
-from sensor.reader import Reader
-from sensor.reader import SensorValue
-
+from ..fds.FdsCommon import FdsCommon as fds
+from ..sensor.reader import Reader, SensorValue
 
 TEMP_1_REGISTER = 0x10  # DS18D20 ( onewire, D5 )
 TEMP_2_REGISTER = 0x14  # DS18D20 ( onewire, D5 )
@@ -106,7 +104,7 @@ class McuArduinoReader(Reader):
 
     def generate_dummy(self, values, data):
         for val in values:
-            data[val] = random.uniform(0, 255)
+            data[val] = round(random.uniform(0, 255), DECIMALS)
 
     def read(self) -> SensorValue:
         data = self.get_all_data()
@@ -201,7 +199,7 @@ class McuArduinoReader(Reader):
         data['type'] = 'mcu'
 
         if self.produce_dummy_data:
-            self.__generate_dummy([
+            self.generate_dummy([
                 TEMP_1_LABEL,
                 TEMP_2_LABEL,
                 PRESSURE_IN_LABEL,
