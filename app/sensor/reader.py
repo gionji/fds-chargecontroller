@@ -39,13 +39,12 @@ class SensorValue:
                 if value_type == 'str':
                     value_type = 'string'
 
-                value_obj = json.dumps({
-                    "device": device_type,
-                    "sensor": key,
+                value_obj = {
+                    "sensor": '{}_{}'.format(device_type, key),
                     "value_type": value_type,
                     "value": value,
                     "timestamp": self.timestamp
-                })
+                }
                 values.append(value_obj)
 
         return values

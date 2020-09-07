@@ -106,12 +106,10 @@ class Sensors:
             self.mcu = None
 
     def read_and_publish(self, data):
-        try:
-            single_values_data = data.stocazzo_format()
-            for value in single_values_data:
-                self.mqtt_client.publish(IIoT.MqttChannels.sensors, value)
-        except Exception as e:
-            print(e)
+        single_values_data = data.stocazzo_format()
+        for value in single_values_data:
+            topic = '{}/{}/{}'.format(IIoT.MqttChannels.sensors, self.mqtt_client.client_id, value['sensor'])
+            self.mqtt_client.publish(topic, json.dumps(value))
 
     def read(self):
         # Read the data
@@ -143,7 +141,7 @@ class Sensors:
         self.configurations[str(key)] = value
 
         configs = configparser.ConfigParser()
-        configs[str(key)] = value
+        configs['DEFAULT'][key] = value
 
         # save to file
         with open(self.config_file, 'w') as configfile:
@@ -160,7 +158,7 @@ class Sensors:
         print(message_payload)
 
         try:
-            _, mqtt_channel, device, key, direction = message_topic.split('/')
+            _, mqtt_channel, module, configuration, direction = message_topic.split('/')
         except Exception as e:
             print(e)
             return None
@@ -169,14 +167,15 @@ class Sensors:
         value_type = message_payload['value_type']
         value = message_payload['value']
 
-        response_topic = "/{}/{}/{}/response".format(mqtt_channel, device, key)
+        response_topic = "/{}/{}/{}/response".format(mqtt_channel, module, configuration)
+        self.mqtt_client.publish(response_topic, json.dumps(message_payload))
 
         try:
-            self.change_property(key, value)
+            self.change_property(configuration, value)
         except Exception as e:
             # publish back
             print(e)
-        self.mqtt_client.publish(response_topic, message_payload)
+
 
     def run(self):
         self.mqtt_client.start()

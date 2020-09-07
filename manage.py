@@ -1,4 +1,3 @@
-import configparser
 import os
 import sys
 
@@ -19,7 +18,10 @@ def run(config):
 
     print(abs_path)
 
-    topics = [IIoT.MqttChannels.sensors, IIoT.MqttChannels.configurations]
+    topics = [
+        '{}/{}/+/request'.format(IIoT.MqttChannels.configurations, MQTT_CLIENT_ID),
+        '{}/{}/+/request'.format(IIoT.MqttChannels.actuators, MQTT_CLIENT_ID)
+    ]
     mqtt_client = connector.MqttLocalClient(MQTT_CLIENT_ID, MQTT_HOSTNAME, int(MQTT_PORT), topics)
     sensors = Sensors(abs_path, mqtt_client)
     sensors.init_properties()
