@@ -23,16 +23,14 @@ class Sensors(threading.Thread):
         self.mqtt_client = mqtt_client
         self.config_file = config_file
 
-        self.mqtt_client.set_callback(self.on_configuration_message_callback)
+        self.mqtt_client.set_callback(self.on_message_callback)
 
     def init_properties(self):
-        configs = configparser.ConfigParser()
-        configs.read(self.config_file)
 
-        if not configs.has_option('DEFAULT', 'READING_INTERVAL'):
+        if self.config_file is None:
             self.read_properties_from_env()
         else:
-            self.read_properties(configs)
+            self.read_properties()
 
     def read_properties_from_env(self):
         self.configurations['READING_INTERVAL'] = int(os.getenv('READING_INTERVAL', 10))
@@ -45,21 +43,25 @@ class Sensors(threading.Thread):
         self.configurations['MCU_I2C_CHANNEL'] = os.getenv('MCU_I2C_CHANNEL', 1)
         self.configurations['MCU_ARDUINO_I2C_ADDRESS'] = os.getenv('MCU_ARDUINO_I2C_ADDRESS', None)  # 0x27
 
-    def read_properties(self, configs):
+    def read_properties(self):
+        configs = configparser.ConfigParser()
+        configs.read(self.config_file)
+
         default = configs['DEFAULT']
-        self.configurations['READING_INTERVAL'] = int(default['READING_INTERVAL'])
-        self.configurations['MODBUS_IP'] = default['MODBUS_IP']
-        self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT'] = default['CHARGE_CONTROLLER_1_MODBUS_UNIT']
-        self.configurations['CHARGE_CONTROLLER_2_MODBUS_UNIT'] = default['CHARGE_CONTROLLER_2_MODBUS_UNIT']
-        self.configurations['RELAY_BOX_MODBUS_UNIT'] = default['RELAY_BOX_MODBUS_UNIT']
-        self.configurations['MCU_I2C_CHANNEL'] = default['MCU_I2C_CHANNEL']
-        self.configurations['MCU_ARDUINO_I2C_ADDRESS'] = default['MCU_ARDUINO_I2C_ADDRESS']
-        self.configurations['DUMMY_DATA'] = bool(default['DUMMY_DATA'])
+        self.configurations['READING_INTERVAL'] = int(default['READING_INTERVAL'.lower()])
+        self.configurations['MODBUS_IP'] = default['MODBUS_IP'.lower()]
+        self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT'] = default['CHARGE_CONTROLLER_1_MODBUS_UNIT'.lower()]
+        self.configurations['CHARGE_CONTROLLER_2_MODBUS_UNIT'] = default['CHARGE_CONTROLLER_2_MODBUS_UNIT'.lower()]
+        self.configurations['RELAY_BOX_MODBUS_UNIT'] = default['RELAY_BOX_MODBUS_UNIT'.lower()]
+        self.configurations['MCU_I2C_CHANNEL'] = default['MCU_I2C_CHANNEL'.lower()]
+        self.configurations['MCU_ARDUINO_I2C_ADDRESS'] = default['MCU_ARDUINO_I2C_ADDRESS'.lower()]
+        self.configurations['DUMMY_DATA'] = bool(int(default['DUMMY_DATA'.lower()]))
 
     def get_properties(self):
         return self.configurations
 
     def init_sensors(self):
+        self.read_properties()
         if self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT'] is not None:
             try:
                 self.charge_controller = modbus_reader.ModbusChargeControllerReader(
@@ -143,10 +145,13 @@ class Sensors(threading.Thread):
             except Exception as e:
                 print(e)
 
-    def change_property(self, key, value):
+    def change_property(self, key, value, value_type):
         self.configurations[str(key)] = value
 
+        # TODO: cast in base a value_type
+
         configs = configparser.ConfigParser()
+        configs.read(self.config_file)
         configs['DEFAULT'][key] = value
 
         # save to file
@@ -154,9 +159,10 @@ class Sensors(threading.Thread):
             configs.write(configfile)
 
         # reinitialize the objects
+        self.init_properties()
         self.init_sensors()
 
-    def on_configuration_message_callback(self, message):
+    def on_message_callback(self, message):
         message_payload = json.loads(message.payload)
         message_topic = message.topic
 
@@ -173,14 +179,17 @@ class Sensors(threading.Thread):
         value_type = message_payload['value_type']
         value = message_payload['value']
 
+        if mqtt_channel == 'configurations':
+            try:
+                self.change_property(configuration, value, value_type)
+            except Exception as e:
+                # publish back
+                print(e)
+        elif mqtt_channel == 'actuators':
+            print(message_payload)
+
         response_topic = "/{}/{}/{}/response".format(mqtt_channel, module, configuration)
         self.mqtt_client.publish(response_topic, json.dumps(message_payload))
-
-        try:
-            self.change_property(configuration, value)
-        except Exception as e:
-            # publish back
-            print(e)
 
     def start(self):
         self.mqtt_client.start()

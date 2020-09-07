@@ -46,7 +46,7 @@ class MqttLocalClient(threading.Thread):
         for path in subscription_paths:
             print('[MQTT_CLIENT] subscribe to ' + path)
             self.client.subscribe(path, qos=qos)
-            time.sleep(0.5)
+            time.sleep(1)
 
     def set_callback(self, callback):
         self.callback = callback
