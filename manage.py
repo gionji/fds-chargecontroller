@@ -6,7 +6,7 @@ from app.utils import connector, IIoT
 
 CONFIG_FILE = 'config.ini'
 
-MQTT_HOSTNAME = os.getenv('MQTT_HOSTNAME', 'mosquitto')
+MQTT_HOSTNAME = os.getenv('MQTT_HOSTNAME', 'localhost')
 MQTT_PORT = os.getenv('MQTT_PORT', '1883')
 MQTT_CLIENT_ID = os.getenv('MQTT_CLIENT_ID', 'CHARGE_CONTROLLER')
 
@@ -26,8 +26,13 @@ def run(config):
     sensors = Sensors(abs_path, mqtt_client)
     sensors.init_properties()
     sensors.init_sensors()
-    mqtt_client.set_callback(sensors.on_configuration_message_callback)
-    sensors.run()
+    sensors.daemon = True
+    try:
+        sensors.start()
+    except Exception as e:
+        print(e)
+        sensors.stop()
+
 
 
 if __name__ == '__main__':
@@ -35,4 +40,5 @@ if __name__ == '__main__':
         config_file = sys.argv[1]
     else:
         config_file = CONFIG_FILE
+
     run(config_file)

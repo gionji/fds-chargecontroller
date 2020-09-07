@@ -31,7 +31,7 @@ class MqttLocalClient(threading.Thread):
         self.client.on_message = self.on_message
         self.client.connect(self.host, self.port, 60)
         self.subscribe_all(self.subscription_paths)
-        self.client.loop_forever()
+        self.client.loop_start()
 
     def on_message(self, client, obj, msg):
         if msg is not None:
@@ -50,3 +50,7 @@ class MqttLocalClient(threading.Thread):
 
     def set_callback(self, callback):
         self.callback = callback
+
+    def stop(self):
+        self.client.loop_stop()
+

@@ -1,23 +1,29 @@
 import configparser
 import json
 import os
-from time import sleep
+import threading
 
 from . import modbus_reader, mcu_arduino_reader
 from ..utils import IIoT
+from ..utils.connector import MqttLocalClient
 
 
-class Sensors:
+class Sensors(threading.Thread):
 
-    def __init__(self, config_file, mqtt_client):
+    def __init__(self, config_file, mqtt_client: MqttLocalClient):
+        super().__init__()
 
         self.configurations = {}
         self.charge_controller = None
         self.charge_controller_2 = None
         self.relay_box = None
         self.mcu = None
+        self.event = threading.Event()
+
         self.mqtt_client = mqtt_client
         self.config_file = config_file
+
+        self.mqtt_client.set_callback(self.on_configuration_message_callback)
 
     def init_properties(self):
         configs = configparser.ConfigParser()
@@ -176,9 +182,14 @@ class Sensors:
             # publish back
             print(e)
 
-
-    def run(self):
+    def start(self):
         self.mqtt_client.start()
         while True:
             self.read()
-            sleep(self.get_properties()['READING_INTERVAL'])
+            self.event.wait(self.get_properties()['READING_INTERVAL'])
+
+    def stop(self):
+        self.event.set()
+        self.mqtt_client.stop()
+        self.mqtt_client.join()
+        self.join()
