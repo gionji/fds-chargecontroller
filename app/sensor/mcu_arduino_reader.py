@@ -63,11 +63,11 @@ class McuArduinoReader(Reader):
 
         self.id = id
         self.produce_dummy_data = produce_dummy_data
-        self.bus         = None
-        self.i2c_bus     = i2c_bus
+        self.bus = None
+        self.i2c_bus = i2c_bus
         self.i2c_address = i2c_address
 
-        if self.produce_dummy_data  == False:
+        if self.produce_dummy_data == False:
             self.bus = smbus2.SMBus(self.i2c_bus)
 
     def is_connected(self, arduino_address):
@@ -194,7 +194,7 @@ class McuArduinoReader(Reader):
 
     def get_all_data(self):
         data = dict()
-        #data['timestamp'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        # data['timestamp'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         data['type'] = 'mcu'
 
@@ -225,7 +225,10 @@ class McuArduinoReader(Reader):
                 data[AC2_CURRENT_LABEL] = self.get_ac_current(2)
             except Exception as e:
                 logging.error('Charge Controller: unpredicted exception')
-                print( e )
+                print(e)
                 raise e
 
         return data
+
+    def __str__(self):
+        return 'MCU: ID: {}, I2C_ADDRESS: {}'.format(self.id, self.i2c_address)

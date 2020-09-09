@@ -130,6 +130,9 @@ class ModbusChargeControllerReader(Reader):
         finally:
             self.client = None
 
+    def __str__(self):
+        return 'MODBUS_READER ID: {}, IP: {}'.format(self.id, self.ip_address)
+
 
 # Modbus reader
 class ModbusRelayBoxReader(Reader):
@@ -239,3 +242,6 @@ class ModbusRelayBoxReader(Reader):
             raise e
         finally:
             self.client = None
+
+    def __str__(self):
+        return 'MODBUS RELAY BOX READER ID: {}, IP: {}'.format(self.id, self.ip_address)

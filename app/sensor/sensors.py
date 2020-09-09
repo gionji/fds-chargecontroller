@@ -2,6 +2,7 @@ import configparser
 import json
 import os
 import threading
+import pprint
 
 from . import modbus_reader, mcu_arduino_reader
 from ..utils import IIoT
@@ -32,37 +33,48 @@ class Sensors(threading.Thread):
         else:
             self.read_properties()
 
+        pprint.pprint(self.configurations)
+
+
     def read_properties_from_env(self):
         self.configurations['READING_INTERVAL'] = int(os.getenv('READING_INTERVAL', 10))
-        self.configurations['DUMMY_DATA'] = bool(os.getenv('DUMMY_DATA', False))
+        self.configurations['DUMMY_DATA'] = int(os.getenv('DUMMY_DATA', 0))
         self.configurations['MODBUS_IP'] = os.getenv('MODBUS_IP', '192.168.2.253')
-        self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT'] = os.getenv('CHARGE_CONTROLLER_1_MODBUS_UNIT',
-                                                                           None)  # 0x1
-        self.configurations['CHARGE_CONTROLLER_2_MODBUS_UNIT'] = os.getenv('CHARGE_CONTROLLER_2_MODBUS_UNIT', None)
-        self.configurations['RELAY_BOX_MODBUS_UNIT'] = os.getenv('RELAY_BOX_MODBUS_UNIT', None)  # 0x09
-        self.configurations['MCU_I2C_CHANNEL'] = os.getenv('MCU_I2C_CHANNEL', 1)
-        self.configurations['MCU_ARDUINO_I2C_ADDRESS'] = os.getenv('MCU_ARDUINO_I2C_ADDRESS', None)  # 0x27
+        self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT'] = int(os.getenv('CHARGE_CONTROLLER_1_MODBUS_UNIT',  1)) # 0x1
+        self.configurations['CHARGE_CONTROLLER_2_MODBUS_UNIT'] = int(os.getenv('CHARGE_CONTROLLER_2_MODBUS_UNIT', 0))
+        self.configurations['RELAY_BOX_MODBUS_UNIT'] = int(os.getenv('RELAY_BOX_MODBUS_UNIT', 0x9))  # 0x09
+        self.configurations['MCU_I2C_CHANNEL'] = int(os.getenv('MCU_I2C_CHANNEL', 1))
+        self.configurations['MCU_ARDUINO_I2C_ADDRESS'] = int(os.getenv('MCU_ARDUINO_I2C_ADDRESS', 0x27))  # 0x27
+        self.config_file = './config.ini'
+        self.save_properties()
+
+    def save_properties(self):
+        configs = configparser.ConfigParser()
+        for key in self.configurations.keys():
+            configs['DEFAULT'][key] = str(self.configurations[key])
+        # save to file
+        with open(self.config_file, 'w') as configfile:
+            configs.write(configfile)
 
     def read_properties(self):
         configs = configparser.ConfigParser()
         configs.read(self.config_file)
 
         default = configs['DEFAULT']
-        self.configurations['READING_INTERVAL'] = int(default['READING_INTERVAL'.lower()])
-        self.configurations['MODBUS_IP'] = default['MODBUS_IP'.lower()]
-        self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT'] = default['CHARGE_CONTROLLER_1_MODBUS_UNIT'.lower()]
-        self.configurations['CHARGE_CONTROLLER_2_MODBUS_UNIT'] = default['CHARGE_CONTROLLER_2_MODBUS_UNIT'.lower()]
-        self.configurations['RELAY_BOX_MODBUS_UNIT'] = default['RELAY_BOX_MODBUS_UNIT'.lower()]
-        self.configurations['MCU_I2C_CHANNEL'] = default['MCU_I2C_CHANNEL'.lower()]
-        self.configurations['MCU_ARDUINO_I2C_ADDRESS'] = default['MCU_ARDUINO_I2C_ADDRESS'.lower()]
-        self.configurations['DUMMY_DATA'] = bool(int(default['DUMMY_DATA'.lower()]))
+        self.configurations['READING_INTERVAL'] = int(default['READING_INTERVAL'])
+        self.configurations['MODBUS_IP'] = default['MODBUS_IP']
+        self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT'] = int(default['CHARGE_CONTROLLER_1_MODBUS_UNIT'])
+        self.configurations['CHARGE_CONTROLLER_2_MODBUS_UNIT'] = int(default['CHARGE_CONTROLLER_2_MODBUS_UNIT'])
+        self.configurations['RELAY_BOX_MODBUS_UNIT'] = int(default['RELAY_BOX_MODBUS_UNIT'])
+        self.configurations['MCU_I2C_CHANNEL'] = int(default['MCU_I2C_CHANNEL'])
+        self.configurations['MCU_ARDUINO_I2C_ADDRESS'] = int(default['MCU_ARDUINO_I2C_ADDRESS'])
+        self.configurations['DUMMY_DATA'] = int(default['DUMMY_DATA'])
 
     def get_properties(self):
         return self.configurations
 
     def init_sensors(self):
-        self.read_properties()
-        if self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT'] is not None:
+        if self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT']:
             try:
                 self.charge_controller = modbus_reader.ModbusChargeControllerReader(
                     'cc1',
@@ -75,7 +87,7 @@ class Sensors(threading.Thread):
         else:
             self.charge_controller = None
 
-        if self.configurations['CHARGE_CONTROLLER_2_MODBUS_UNIT'] is not None:
+        if self.configurations['CHARGE_CONTROLLER_2_MODBUS_UNIT']:
             try:
                 self.charge_controller_2 = modbus_reader.ModbusChargeControllerReader(
                     'cc2',
@@ -88,7 +100,7 @@ class Sensors(threading.Thread):
         else:
             self.charge_controller_2 = None
 
-        if self.configurations['RELAY_BOX_MODBUS_UNIT'] is not None:
+        if self.configurations['RELAY_BOX_MODBUS_UNIT']:
             try:
                 self.relay_box = modbus_reader.ModbusRelayBoxReader(
                     'rb',
@@ -101,7 +113,7 @@ class Sensors(threading.Thread):
         else:
             self.relay_box = None
 
-        if self.configurations['MCU_ARDUINO_I2C_ADDRESS'] is not None:
+        if self.configurations['MCU_ARDUINO_I2C_ADDRESS']:
             try:
                 self.mcu = mcu_arduino_reader.McuArduinoReader(
                     'mcu',
@@ -112,6 +124,11 @@ class Sensors(threading.Thread):
                 self.mcu = None
         else:
             self.mcu = None
+
+        print("CG_1: {}".format(self.charge_controller))
+        print("CG_2: {}".format(self.charge_controller_2))
+        print("RB: {}".format(self.relay_box))
+        print("MCU: {}".format(self.mcu))
 
     def read_and_publish(self, data):
         single_values_data = data.stocazzo_format()
@@ -148,19 +165,12 @@ class Sensors(threading.Thread):
     def change_property(self, key, value, value_type):
         self.configurations[str(key)] = value
 
-        # TODO: cast in base a value_type
-
-        configs = configparser.ConfigParser()
-        configs.read(self.config_file)
-        configs['DEFAULT'][key] = value
-
-        # save to file
-        with open(self.config_file, 'w') as configfile:
-            configs.write(configfile)
+        self.save_properties()
 
         # reinitialize the objects
         self.init_properties()
         self.init_sensors()
+        self.event.set()
 
     def on_message_callback(self, message):
         message_payload = json.loads(message.payload)
@@ -195,10 +205,10 @@ class Sensors(threading.Thread):
         self.mqtt_client.start()
         while True:
             self.read()
-            self.event.wait(self.get_properties()['READING_INTERVAL'])
+            self.event.wait(int(self.get_properties()['READING_INTERVAL']))
+            self.event.clear()
 
     def stop(self):
-        self.event.set()
         self.mqtt_client.stop()
         self.mqtt_client.join()
         self.join()
