@@ -78,6 +78,7 @@ class Sensors(threading.Thread):
             try:
                 self.charge_controller = modbus_reader.ModbusChargeControllerReader(
                     'cc1',
+                    ip_address=self.configurations['MODBUS_IP'],
                     unit_id=int(self.configurations['CHARGE_CONTROLLER_1_MODBUS_UNIT']),
                     produce_dummy_data=self.configurations['DUMMY_DATA']
                 )
@@ -91,6 +92,7 @@ class Sensors(threading.Thread):
             try:
                 self.charge_controller_2 = modbus_reader.ModbusChargeControllerReader(
                     'cc2',
+                    ip_address=self.configurations['MODBUS_IP'],
                     unit_id=int(self.configurations['CHARGE_CONTROLLER_2_MODBUS_UNIT']),
                     produce_dummy_data=self.configurations['DUMMY_DATA']
                 )
@@ -104,6 +106,7 @@ class Sensors(threading.Thread):
             try:
                 self.relay_box = modbus_reader.ModbusRelayBoxReader(
                     'rb',
+                    ip_address=self.configurations['MODBUS_IP'],
                     unit_id=int(self.configurations['RELAY_BOX_MODBUS_UNIT']),
                     produce_dummy_data=self.configurations['DUMMY_DATA']
                 )
